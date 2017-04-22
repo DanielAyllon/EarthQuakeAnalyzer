@@ -1,0 +1,11 @@
+Package: EarthQuakeAnalyzer
+Type: Package
+Title: Clean, analyze and visualize earthquake data from the NOAA Significant Earthquakes dataset
+Version: 0.1.0
+Author: Daniel Ayllón
+Maintainer: Daniel Ayllón <daniel.ayllon@bio.ucm.es>
+Description: Clean, analyze and visualize earthquake data from the NOAA Significant Earthquakes dataset.
+License: CC0
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1

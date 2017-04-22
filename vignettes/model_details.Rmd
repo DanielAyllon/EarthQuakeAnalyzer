@@ -1,0 +1,283 @@
+---
+title: "Model Details for QuakeAnalyzer package"
+author: "Daniel Ayllon"
+date: "17 April 2017"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Model Details for QuakeAnalyzer package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# R QuakeAnalyzer package
+
+The R QuakeAnalyzer package was developed to work with the NOAA Significant Earthquakes dataset.
+
+The package incorporate tools for processing and visualizing the dataset obtained from the U.S. National Oceanographic and Atmospheric Administration (NOAA) on significant earthquakes around the world. This dataset contains information about 5,933 earthquakes over an approximately 4,000 year time span.  
+
+It includes tools for: (1) reading and cleaning the dataset, (2) adding a geom instance to a ggplot object to plot a timeline of selected earthquakes providing information about the magnitude and number of deaths, and (3) creating a leaflet fully interactive map showing the location of epicenters of selected earthquakes with information regarding the magnitude and number of deaths.
+
+## Required packages
+The R Assignment package requires functions from the readr, dplyr, tidyr, lubridate, stringr, ggplot2, grid and leaflet R packages.
+
+```{r load libraries}
+library(readr)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(stringr)
+library(ggplot2)
+library(grid)
+library(leaflet)
+```
+
+### Functions for processing and cleaning the data
+#### eq_clean_data() Function
+This function reads the raw earthquake dataset in a tab-delimited format to clean some of the variables. The function first checks whether the file to be read actually exists.If it does not exist, then it downloads from the NOOA website.Then, the function adds a date column created by uniting the year, month, day of each earthquake and converting it to the Date class.
+
+It has only one argument, `filename`, a character vector of the name of the tab-delimited text file to be read.
+
+Here, it is read and stored the file:
+
+```{r eq_clean_data, echo = FALSE}
+eq_clean_data<-function(filename) {
+        if(!file.exists(filename)) {
+                download.file("https://www.ngdc.noaa.gov/nndc/struts/results?type_0=Exact&query_0=$ID&t=101650&s=13&d=189&dfn=signif.txt",filename)
+        }
+        EarthquakeData<-readr::read_delim(filename,delim = "\t",col_types ="iciiiiininnnnnnnicccnniiiiiiiniiiiiiiiiiiniiiii") %>%
+                dplyr::mutate(YEAR = as.character(YEAR)) %>%
+                dplyr::mutate(NEWYEAR=ifelse(nchar(YEAR)==1,paste0("000",YEAR),
+                                      ifelse(nchar(YEAR)==2,paste0("00",YEAR),
+                                             ifelse(nchar(YEAR)==3,paste0("0",YEAR),YEAR)))) %>%
+                tidyr::unite(DATETIME, NEWYEAR, MONTH, DAY) %>%
+                dplyr::mutate(DATETIME = lubridate::ymd(DATETIME)) %>%
+                dplyr::mutate(LATITUDE = as.numeric(LATITUDE),LONGITUDE = as.numeric(LONGITUDE))
+        EarthquakeData
+}
+```
+
+```{r NOAA Significant Earthquakes dataset}
+tail(eq_clean_data("signif.txt"))
+```
+
+#### eq_location_clean() Function
+The package includes a function to clean up the "LOCATION_NAME" column from either the downloaded raw dataset or the processes dataframe, as cleaned by the eq_clean_data() function.
+
+The function returns a dataframe with the column "LOCATION_NAME" cleaned by stripping out the country name (including the colon) and convert names to title case (as opposed to all caps).The dataframe to be cleaned is given by the input parameter `EarthquakeData`, the only argument of the function.
+
+Here, the dataframe processed in the previous example gets the "LOCATION_NAME"  cleaned:
+
+```{r eq_location_clean, echo = FALSE}
+eq_location_clean<-function(EarthquakeData) {
+        n_earthquakes<-length(EarthquakeData$LOCATION_NAME)
+        clean_loc_name<-data.frame()
+        for(i in 1:n_earthquakes){
+                myname<-as.character(EarthquakeData$LOCATION_NAME[[i]])
+                colon_loc<-regexpr("\\:[^\\:]*$", myname)[[1]]
+                myname<-substring(myname,colon_loc + 1) %>% 
+                        stringr::str_trim(.) %>%
+                        stringr::str_to_title(.)
+                clean_loc_name[i,1]<-myname
+        }
+        colnames(clean_loc_name)<-"LOCATION_NAME"
+        myData<-dplyr::select(EarthquakeData,-LOCATION_NAME) 
+        myData<-cbind(myData,clean_loc_name)
+        myData
+}
+```
+
+```{r generate filename}
+eq_clean_data("signif.txt") %>% eq_location_clean() %>% select(DATETIME,EQ_PRIMARY,LOCATION_NAME) %>% tail()
+```
+
+### Functions for plotting the data with ggplot2
+#### geom_timeline() Function
+This function reads the raw earthquake dataset in a dataframe format to create a ggplot geom that plots a time line of earthquakes ranging from the minimum to the maximum dates with a point for each earthquake.
+
+The `x` aesthetic is a date and an optional `y` aesthetic is a factor that stratifies the data by country, in which case multiple time lines will be plotted, one for each country.
+
+In addition to showing the dates on which the earthquakes occur, it is also possible to show the magnitudes (i.e. Richter scale value) and the number of deaths associated with each earthquake, which are input via the `size` and `fill` optional aesthetics. 
+
+In the example, the function plots a time line with all earthquakes since year 2000, the colour of the points indicating the number of deaths:
+
+```{r geom_timeline code, echo = FALSE}
+GeomTimeline<- ggplot2::ggproto("GeomTimeline", Geom,
+                          required_aes = "x",
+                          default_aes = ggplot2::aes(y=0.1,fill = "blue",size=0.01,alpha=0.7),
+                          draw_key = ggplot2::draw_key_point,
+                          draw_panel = function(data, panel_scales, coord) {
+
+                 mydata<-dplyr::mutate(data,x=lubridate::as_date(x)) %>%
+                 dplyr::mutate(x=lubridate::decimal_date(x)) %>%
+                 dplyr::mutate(y=as.numeric(y)) %>%
+                 dplyr::filter(!is.na(x)) %>%
+                 dplyr::filter(!is.na(fill)) %>%
+                 dplyr::filter(!is.na(size)) %>%
+                 dplyr::mutate(size=size/100) 
+
+           xmin<-min(mydata$x)
+           xmax<-max(mydata$x)   
+           panel_scales$x.range<-c(xmin,xmax)
+
+                 
+           coords <- coord$transform(mydata, panel_scales) 
+           
+
+           grid::pointsGrob(
+                   x = grid::unit(coords$x,"native"),
+                   y = grid::unit(coords$y,"native"),
+                   size = grid::unit(coords$size,"native"),
+                   gp = grid::gpar(fill=coords$fill,alpha=coords$alpha,col=coords$fill)
+                   )
+                          }
+)
+
+
+geom_timeline <- function(mapping = NULL, data = NULL, stat = "identity", position = "identity", na.rm = FALSE, show.legend = NA, inherit.aes = TRUE, ...) {
+        ggplot2::layer(
+                geom = GeomTimeline, mapping = mapping,  
+                data = data, stat = stat, position = position, 
+                show.legend = show.legend, inherit.aes = inherit.aes,
+                params = list(na.rm = na.rm, ...)
+        )
+}
+```
+
+```{r plot timeline of earthquakes}
+quakedata<-eq_clean_data("signif.txt") %>%
+  filter(year(DATETIME)>2000)
+ggplot() + geom_timeline(data = quakedata,aes(x = DATETIME, fill = TOTAL_DEATHS)) + scale_color_gradient()
+```
+
+#### geom_timeline_label() Function
+This function reads the raw earthquake dataset in a dataframe format to create a ggplot geom that plots a time line of earthquakes ranging from the minimum to the maximum dates with a point for each earthquake, and adds annotations to the plotted data.This geom adds a vertical line to each data point with a text annotation showing the location of the earthquake attached to each line.
+
+The `x` aesthetic is a date and an optional `y` aesthetic is a factor that stratifies the data by country, in which case multiple time lines will be plotted, one for each country. The `label` aesthetic indicates the name of the location of the earthquake.
+
+In addition to showing the dates on which the earthquakes occur, it is also possible to show the magnitudes (i.e. Richter scale value) and the number of deaths associated with each earthquake, which are input via the `size` and `fill` optional aesthetics. 
+
+There is also the option to subset to n_max number of earthquakes, where the function takes the `n_max` largest (by magnitude) earthquakes. 
+
+In the example, the function plots a time line with all earthquakes since year 2000, the colour of the points indicating the number of deaths, and shows the name of the ten largest ones:
+
+```{r geom_timeline_label code, echo = FALSE}
+GeomTimelineLabel<- ggplot2::ggproto("GeomTimelineLabel", Geom,
+                                  required_aes =c("x","label"),default_aes = ggplot2::aes(y=0.1,n_max=NULL,fill = "blue",size=0.025,alpha=0.7),
+                                draw_key = ggplot2::draw_key_text,
+                                draw_panel = function(data, panel_scales, coord) {                                           n_earthquakes<-data[1,4]
+     mydata<-dplyr::mutate(data,x=lubridate::as_date(x)) %>%
+             dplyr::mutate(x=lubridate::decimal_date(x)) %>%
+             dplyr::mutate(y=as.numeric(y)) %>%
+             dplyr::filter(!is.na(x)) %>%
+             dplyr::filter(!is.na(fill)) %>%
+             dplyr::filter(!is.na(size)) %>%
+             dplyr::mutate(size=size/100)
+             
+     myannotationdata<-dplyr::arrange(mydata,dplyr::desc(size)) %>%
+             dplyr::slice(1:n_earthquakes)
+     
+                            
+     xmin<-min(mydata$x)
+     xmax<-max(mydata$x)   
+     panel_scales$x.range<-c(xmin,xmax)
+                                        
+                                        
+     coords <- coord$transform(mydata, panel_scales)
+     coordsannot<-coord$transform(myannotationdata, panel_scales)
+                                        
+     pointsQuakes<-                                   
+     grid::pointsGrob(
+                      x = grid::unit(coords$x,"native"),
+                      y = grid::unit(coords$y,"native"),
+                      size = grid::unit(coords$size,"native"),
+                     gp = grid::gpar(fill=coords$fill,alpha=coords$alpha,col=coords$fill)
+                                )
+     linesQuakes<-
+     grid::segmentsGrob(
+             x0 = grid::unit(coordsannot$x,"native"),
+             y0 = grid::unit(coordsannot$y,"native"),
+             x1 = grid::unit(coordsannot$x,"native"),
+             y1 = grid::unit((coordsannot$y)+0.1,"native")
+     )
+     
+     textsquakes<-
+     grid::textGrob(
+             label=coords$label,        
+             x = grid::unit(coordsannot$x,"native"),
+             y = grid::unit((coordsannot$y)+0.12,"native"),
+             just="left",
+             rot=45
+             )
+     
+     grid::gTree(children=grid::gList(pointsQuakes,linesQuakes,textsquakes))        
+                                }
+)
+
+
+geom_timeline_label <- function(mapping = NULL, data = NULL, stat = "identity", position = "identity", na.rm = FALSE, show.legend = NA, inherit.aes = TRUE, ...) {
+        ggplot2::layer(
+                geom = GeomTimelineLabel, mapping = mapping,  
+                data = data, stat = stat, position = position, 
+                show.legend = show.legend, inherit.aes = inherit.aes,
+                params = list(na.rm = na.rm, ...)
+        )
+}
+```
+
+```{r plot annotated timeline of earthquakes}
+quakedata<-eq_clean_data("signif.txt") %>% eq_location_clean() %>%
+  filter(year(DATETIME)>2000)
+ggplot() + geom_timeline_label(data = quakedata,aes(x = DATETIME, label = LOCATION_NAME,n_max = 10, fill = DEATHS)) + scale_color_gradient()
+```
+
+### Functions for mapping the data in a in a leaflet interactive map
+#### eq_map() Function
+This function reads a filtered data frame with earthquakes selected to visualize. The function maps the epicenters (LATITUDE/LONGITUDE) and annotates each point in a pop-up window containing annotation data stored in a column of the data frame. Each earthquake is shown with a circle, and the radius of the circle is proportional to the earthquake's magnitude.
+
+It requires the input parameters `dataframe`, a filtered dataframe, and `annot_col`, a character vector that indicates which column is used for the annotation in the pop-up window. 
+
+Here, the function creates a leaflet interactive map showing the epicenter of the earthquakes in Mexico since year 2000:
+
+```{r eq_map code, echo = FALSE}
+eq_map<-function(dataframe,annot_col){
+        mydataframe<-dataframe[,c("LATITUDE","LONGITUDE","EQ_PRIMARY",annot_col)]
+        leaflet::leaflet() %>%
+        leaflet::addTiles() %>%
+        leaflet::addCircleMarkers(data = mydataframe, radius = ~ ifelse(!is.na(EQ_PRIMARY),EQ_PRIMARY,2),lng = ~ LONGITUDE, lat = ~ LATITUDE, popup = ~ mydataframe[,annot_col])
+}
+```
+
+```{r earthquakes in Mexico since year 2000}
+eq_clean_data("signif.txt") %>% 
+dplyr::filter(COUNTRY == "MEXICO" & lubridate::year(DATETIME) >= 2000) %>% 
+eq_map(annot_col = "DATETIME")
+```
+
+#### eq_create_label() Function
+This function takes the filtered and cleaned dataframe as an argument and creates an HTML label that can be used as the annotation text in a leaflet map created by eq_map().
+
+This function puts together a character string for each earthquake that shows the cleaned location (as cleaned by the eq_location_clean() function), the magnitude, and the total number of deaths, with boldface labels for each. If an earthquake is missing values for any of these, both the label and the value are skipped for that element of the tag. 
+
+The only input parameter is `dataframe`, a dataframe that has been cleaned by the eq_location_clean() function. 
+
+Here, the function creates a label to be used in a leaflet interactive map showing the epicenter of the earthquakes in Mexico since year 2000:
+
+```{r eq_create_label code, echo = FALSE}
+eq_create_label<-function(dataframe){
+        mydataframe<-dplyr::select(dataframe,LATITUDE,LONGITUDE,LOCATION_NAME,EQ_PRIMARY,TOTAL_DEATHS) %>%
+                dplyr::mutate(popup_text=paste("<b>Location:</b>", LOCATION_NAME, "<br />"),popup_text=ifelse(!is.na(EQ_PRIMARY),paste(popup_text,"<b>Magnitude:</b>", EQ_PRIMARY, "<br />"),popup_text),
+popup_text=ifelse(!is.na(TOTAL_DEATHS),paste(popup_text,      "<b>Total deaths:</b>", TOTAL_DEATHS, "<br />"),popup_text))
+}
+```
+
+```{r label for earthquakes in Mexico since year 2000}
+eq_clean_data("signif.txt") %>% 
+dplyr::filter(COUNTRY == "MEXICO" & lubridate::year(DATETIME) >= 2000) %>% 
+eq_create_label() %>% 
+eq_map(annot_col = "popup_text")
+```
