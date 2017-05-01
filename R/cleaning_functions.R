@@ -9,6 +9,7 @@
 #'
 #' @return This function returns a clean data frame.
 #'
+#' @importFrom utils download.file
 #' @importFrom readr read_delim
 #' @importFrom dplyr %>%
 #' @importFrom dplyr mutate
@@ -23,7 +24,7 @@
 #' @export
 eq_clean_data<-function(filename) {
         if(!file.exists(filename)) {
-                download.file("https://www.ngdc.noaa.gov/nndc/struts/results?type_0=Exact&query_0=$ID&t=101650&s=13&d=189&dfn=signif.txt",filename)
+                utils::download.file("https://www.ngdc.noaa.gov/nndc/struts/results?type_0=Exact&query_0=$ID&t=101650&s=13&d=189&dfn=signif.txt",filename)
         }
         EarthquakeData<-readr::read_delim(filename,delim = "\t",col_types ="iciiiiininnnnnnnicccnniiiiiiiniiiiiiiiiiiniiiii") %>%
                 dplyr::mutate(YEAR = as.character(YEAR)) %>%

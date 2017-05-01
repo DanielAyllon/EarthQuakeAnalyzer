@@ -47,7 +47,7 @@ Here, it is read and stored the file:
 ```{r eq_clean_data, echo = FALSE}
 eq_clean_data<-function(filename) {
         if(!file.exists(filename)) {
-                download.file("https://www.ngdc.noaa.gov/nndc/struts/results?type_0=Exact&query_0=$ID&t=101650&s=13&d=189&dfn=signif.txt",filename)
+                utils::download.file("https://www.ngdc.noaa.gov/nndc/struts/results?type_0=Exact&query_0=$ID&t=101650&s=13&d=189&dfn=signif.txt",filename)
         }
         EarthquakeData<-readr::read_delim(filename,delim = "\t",col_types ="iciiiiininnnnnnnicccnniiiiiiiniiiiiiiiiiiniiiii") %>%
                 dplyr::mutate(YEAR = as.character(YEAR)) %>%
@@ -107,7 +107,7 @@ In addition to showing the dates on which the earthquakes occur, it is also poss
 In the example, the function plots a time line with all earthquakes since year 2000, the colour of the points indicating the number of deaths:
 
 ```{r geom_timeline code, echo = FALSE}
-GeomTimeline<- ggplot2::ggproto("GeomTimeline", Geom,
+GeomTimeline<- ggplot2::ggproto("GeomTimeline", ggplot2::Geom,
                           required_aes = "x",
                           default_aes = ggplot2::aes(y=0.1,fill = "blue",colour="blue",
                                                      size=0.01,alpha=0.7,stroke = 0.5,
@@ -172,7 +172,7 @@ There is also the option to subset to n_max number of earthquakes, where the fun
 In the example, the function plots a time line with all earthquakes since year 2000, the colour of the points indicating the number of deaths, and shows the name of the ten largest ones:
 
 ```{r geom_timeline_label code, echo = FALSE}
-GeomTimelineLabel<- ggplot2::ggproto("GeomTimelineLabel", Geom,
+GeomTimelineLabel<- ggplot2::ggproto("GeomTimelineLabel", ggplot2::Geom,
                                   required_aes =c("x","label"),default_aes = ggplot2::aes(y=0.1,n_max=NULL,fill = "blue",size=0.025,alpha=0.7),
                                 draw_key = ggplot2::draw_key_text,
                                 draw_panel = function(data, panel_scales, coord) {                                           n_earthquakes<-data[1,4]
@@ -259,7 +259,7 @@ eq_map<-function(dataframe,annot_col){
 ```
 
 ```{r earthquakes in Mexico since year 2000}
-eq_clean_data("signif.txt") %>% 
+eq_clean_data("signif.txt") %>%
 dplyr::filter(COUNTRY == "MEXICO" & lubridate::year(DATETIME) >= 2000) %>% 
 eq_map(annot_col = "DATETIME")
 ```
@@ -282,7 +282,7 @@ popup_text=ifelse(!is.na(TOTAL_DEATHS),paste(popup_text,      "<b>Total deaths:<
 ```
 
 ```{r label for earthquakes in Mexico since year 2000}
-eq_clean_data("signif.txt") %>% 
+eq_clean_data("signif.txt") %>%
 dplyr::filter(COUNTRY == "MEXICO" & lubridate::year(DATETIME) >= 2000) %>% 
 eq_create_label() %>% 
 eq_map(annot_col = "popup_text")

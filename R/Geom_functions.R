@@ -13,7 +13,7 @@
 #' @return An earthquakes' timeline geom which can be added to a ggplot.
 #'
 #' @importFrom ggplot2 ggproto
-#' @importFrom ggplot2 geom
+#' @importFrom ggplot2 Geom
 #' @importFrom ggplot2 aes
 #' @importFrom ggplot2 draw_key_point
 #' @importFrom ggplot2 layer
@@ -97,6 +97,7 @@ geom_timeline <- function(mapping = NULL, data = NULL, stat = "identity", positi
 #' @return An earthquakes' timeline geom with text annotations linked to the selected earthquakes which can be added to a ggplot.
 #'
 #' @importFrom ggplot2 ggproto
+#' @importFrom ggplot2 Geom
 #' @importFrom ggplot2 aes
 #' @importFrom ggplot2 draw_key_point
 #' @importFrom ggplot2 layer
@@ -120,7 +121,7 @@ geom_timeline <- function(mapping = NULL, data = NULL, stat = "identity", positi
 #' }
 #'
 #' @export
-GeomTimelineLabel<- ggplot2::ggproto("GeomTimelineLabel", Geom,
+GeomTimelineLabel<- ggplot2::ggproto("GeomTimelineLabel", ggplot2::Geom,
                                 required_aes =c("x","label"),
                                 default_aes = ggplot2::aes(y=0.1,n_max=NULL,fill = "blue",
                                                            colour="blue",size=0.025,alpha=0.7,
