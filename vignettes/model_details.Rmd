@@ -11,7 +11,7 @@ vignette: >
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,message=F, warning=F)
 ```
 
 # R QuakeAnalyzer package
@@ -156,8 +156,8 @@ geom_timeline <- function(mapping = NULL, data = NULL, stat = "identity", positi
 
 ```{r plot timeline of earthquakes}
 quakedata<-eq_clean_data("signif.txt") %>%
-  filter(year(DATETIME)>2000 & c("USA","CHINA"))
-ggplot() + geom_timeline(data = quakedata,aes(x = DATETIME, fill = TOTAL_DEATHS)) + scale_color_gradient()
+  filter(year(DATETIME)>2000 & COUNTRY==c("USA","CHINA"))
+ggplot() + geom_timeline(data = quakedata,aes(x = DATETIME, y = COUNTRY, size = EQ_PRIMARY, colour = TOTAL_DEATHS))
 ```
 
 #### geom_timeline_label() Function
@@ -234,8 +234,8 @@ geom_timeline_label <- function(mapping = NULL, data = NULL, stat = "identity", 
 ```
 
 ```{r plot annotated timeline of earthquakes}
-quakedata<-eq_clean_data("signif.txt") %>%
-  filter(year(DATETIME)>2000 & c("USA","CHINA"))
+quakedata<-eq_clean_data("signif.txt") %>% eq_location_clean() %>%
+  filter(year(DATETIME)>2000 & COUNTRY==c("USA","CHINA")) 
 ggplot() + geom_timeline(data = quakedata,aes(x = DATETIME, y = COUNTRY, size = EQ_PRIMARY, colour = TOTAL_DEATHS)) + geom_timeline_label(data = quakedata,aes(x = DATETIME, label = LOCATION_NAME,y = COUNTRY, n_max = 10, magnitude = EQ_PRIMARY)) + scale_color_gradient()
 ```
 
