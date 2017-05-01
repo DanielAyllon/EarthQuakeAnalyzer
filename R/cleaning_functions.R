@@ -1,11 +1,11 @@
-#' Clean downloaded data frame 
+#' Clean downloaded data frame
 #'
 #' This function reads an Earthquake dataset in a tab-delimited file to clean some of the variables.
 #' The function first checks whether the file to be read actually exists.If it does not exist, then it downloads from the NOOA website.
 #' Then, the function adds a date column created by uniting the year, month, day of each earthquake and converting it to the Date class.
 #' Finally, the function converts the LATITUDE and LONGITUDE columns to numeric class.
 #'
-#' @param filename A character vector of the name of the tab-delimited file to be read. 
+#' @param filename A character vector of the name of the tab-delimited file to be read.
 #'
 #' @return This function returns a clean data frame.
 #'
@@ -32,18 +32,19 @@ eq_clean_data<-function(filename) {
                                              ifelse(nchar(YEAR)==3,paste0("0",YEAR),YEAR)))) %>%
                 tidyr::unite(DATETIME, NEWYEAR, MONTH, DAY) %>%
                 dplyr::mutate(DATETIME = lubridate::ymd(DATETIME)) %>%
-                dplyr::mutate(LATITUDE = as.numeric(LATITUDE),LONGITUDE = as.numeric(LONGITUDE))
+                dplyr::mutate(LATITUDE = as.numeric(LATITUDE),LONGITUDE = as.numeric(LONGITUDE)) %>%
+                dplyr::mutate(YEAR = as.numeric(YEAR))
         EarthquakeData
 }
 
 
 
 
-#' Clean up LOCATION_NAME column from downloaded data frame 
+#' Clean up LOCATION_NAME column from downloaded data frame
 #'
 #' This function reads an Earthquake dataset in a dataframe format to clean the LOCATION_NAME column by stripping out the country name (including the colon) and convert names to title case (as opposed to all caps).
 #'
-#' @param EarthquakeData A dataframe. 
+#' @param EarthquakeData A dataframe.
 #'
 #' @return This function returns a data frame with the column LOCATION_NAME cleaned.
 #'
@@ -64,13 +65,13 @@ eq_location_clean<-function(EarthquakeData) {
         for(i in 1:n_earthquakes){
                 myname<-as.character(EarthquakeData$LOCATION_NAME[[i]])
                 colon_loc<-regexpr("\\:[^\\:]*$", myname)[[1]]
-                myname<-substring(myname,colon_loc + 1) %>% 
+                myname<-substring(myname,colon_loc + 1) %>%
                         stringr::str_trim(.) %>%
                         stringr::str_to_title(.)
                 clean_loc_name[i,1]<-myname
         }
         colnames(clean_loc_name)<-"LOCATION_NAME"
-        myData<-dplyr::select(EarthquakeData,-LOCATION_NAME) 
+        myData<-dplyr::select(EarthquakeData,-LOCATION_NAME)
         myData<-cbind(myData,clean_loc_name)
         myData
 }

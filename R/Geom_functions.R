@@ -32,7 +32,9 @@
 #' @export
 GeomTimeline<- ggplot2::ggproto("GeomTimeline", Geom,
                           required_aes = "x",
-                          default_aes = ggplot2::aes(y=0.1,fill = "blue",size=0.01,alpha=0.7),
+                          default_aes = ggplot2::aes(y=0.1,fill = "blue",colour="blue",
+                                                     size=0.01,alpha=0.7,stroke = 0.5,
+                                                     shape = 21),
                           draw_key = ggplot2::draw_key_point,
                           draw_panel = function(data, panel_scales, coord) {
 
@@ -54,8 +56,12 @@ GeomTimeline<- ggplot2::ggproto("GeomTimeline", Geom,
            grid::pointsGrob(
                    x = grid::unit(coords$x,"native"),
                    y = grid::unit(coords$y,"native"),
+                   pch = coords$shape,
                    size = grid::unit(coords$size,"native"),
-                   gp = grid::gpar(fill=coords$fill,alpha=coords$alpha,col=coords$fill)
+                   gp = grid::gpar(
+                           col = coords$colour,
+                           alpha=coords$alpha,
+                           fill = coords$fill)
                    )
                           }
 )
@@ -113,7 +119,10 @@ geom_timeline <- function(mapping = NULL, data = NULL, stat = "identity", positi
 #'
 #' @export
 GeomTimelineLabel<- ggplot2::ggproto("GeomTimelineLabel", Geom,
-                                  required_aes =c("x","label"),default_aes = ggplot2::aes(y=0.1,n_max=NULL,fill = "blue",size=0.025,alpha=0.7),
+                                required_aes =c("x","label"),
+                                default_aes = ggplot2::aes(y=0.1,n_max=NULL,fill = "blue",
+                                                           colour="blue",size=0.025,alpha=0.7,
+                                                           stroke = 0.5,shape = 21),
                                 draw_key = ggplot2::draw_key_text,
                                 draw_panel = function(data, panel_scales, coord) {
 
@@ -143,8 +152,12 @@ GeomTimelineLabel<- ggplot2::ggproto("GeomTimelineLabel", Geom,
      grid::pointsGrob(
                       x = grid::unit(coords$x,"native"),
                       y = grid::unit(coords$y,"native"),
+                      pch = coords$shape,
                       size = grid::unit(coords$size,"native"),
-                     gp = grid::gpar(fill=coords$fill,alpha=coords$alpha,col=coords$fill)
+                      gp = grid::gpar(
+                             col = coords$colour,
+                             alpha=coords$alpha,
+                             fill = coords$fill)
                                 )
      linesQuakes<-
      grid::segmentsGrob(
