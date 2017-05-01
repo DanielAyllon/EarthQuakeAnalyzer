@@ -20,10 +20,14 @@
 #'
 #' @export
 eq_map<-function(dataframe,annot_col){
-        mydataframe<-dataframe[,c("LATITUDE","LONGITUDE","EQ_PRIMARY",annot_col)]
         leaflet::leaflet() %>%
         leaflet::addTiles() %>%
-        leaflet::addCircleMarkers(data = mydataframe, radius = ~ ifelse(!is.na(EQ_PRIMARY),EQ_PRIMARY,2),lng = ~ LONGITUDE, lat = ~ LATITUDE, popup = ~ mydataframe[,annot_col])
+        leaflet::addCircleMarkers(
+                data = dataframe,
+                radius = ~ ifelse(!is.na(EQ_PRIMARY),EQ_PRIMARY,2),
+                lng = ~ LONGITUDE,
+                lat = ~ LATITUDE,
+                popup = ~ dataframe[[annot_col]])
 }
 
 
