@@ -26,15 +26,15 @@ eq_clean_data<-function(filename) {
         if(!file.exists(filename)) {
                 utils::download.file("https://www.ngdc.noaa.gov/nndc/struts/results?type_0=Exact&query_0=$ID&t=101650&s=13&d=189&dfn=signif.txt",filename)
         }
-        EarthquakeData<-readr::read_delim(filename,delim = "\t",col_types ="iciiiiininnnnnnnicccnniiiiiiiniiiiiiiiiiiniiiii") %>%
+        EarthquakeData<-readr::read_delim(filename,delim = "\t") %>%
+                dplyr::filter(!is.na(YEAR), YEAR > 0, !is.na(MONTH), !is.na(DAY)) %>%
                 dplyr::mutate(YEAR = as.character(YEAR)) %>%
                 dplyr::mutate(NEWYEAR=ifelse(nchar(YEAR)==1,paste0("000",YEAR),
                                       ifelse(nchar(YEAR)==2,paste0("00",YEAR),
                                              ifelse(nchar(YEAR)==3,paste0("0",YEAR),YEAR)))) %>%
                 tidyr::unite(DATETIME, NEWYEAR, MONTH, DAY) %>%
                 dplyr::mutate(DATETIME = lubridate::ymd(DATETIME)) %>%
-                dplyr::mutate(LATITUDE = as.numeric(LATITUDE),LONGITUDE = as.numeric(LONGITUDE)) %>%
-                dplyr::mutate(YEAR = as.numeric(YEAR))
+                dplyr::mutate(LATITUDE = as.numeric(LATITUDE),LONGITUDE = as.numeric(LONGITUDE),EQ_PRIMARY = as.numeric(EQ_PRIMARY),TOTAL_DEATHS = as.numeric(TOTAL_DEATHS),YEAR = as.numeric(YEAR))
         EarthquakeData
 }
 

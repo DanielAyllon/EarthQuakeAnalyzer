@@ -3,7 +3,7 @@
 \docType{data}
 \name{GeomTimelineLabel}
 \alias{GeomTimelineLabel}
-\title{ggplot geom to plot a time line of earthquakes with annotations to the earthquake data}
+\title{ggplot geom to plot text annotations for a time line of earthquakes}
 \format{An object of class \code{GeomTimelineLabel} (inherits from \code{Geom}, \code{ggproto}) of length 5.}
 \usage{
 GeomTimelineLabel
@@ -17,25 +17,20 @@ GeomTimelineLabel
 
 \item{n_max}{Optional aesthetic that represents a number indicating the number of the largest earthquakes (by magnitude) to be annotated.}
 
-\item{fill}{Optional aesthetic which contains a numeric vector of the number of deaths in each earthquake, which will define the colour of the points to be plotted.}
-
-\item{size}{Optional aesthetic which contains a numeric vector of the magnitude (in the Richter scale) of each earthquake, which will define the size of the points to be plotted.}
-
-\item{alpha}{Optional aesthetic that represents a number between 0 and 1, which indicates the level of transparency of represented points.}
+\item{magnitude}{Optional aesthetic which contains a numeric vector of the magnitude (in the Richter scale) of each earthquake.}
 }
 \value{
-An earthquakes' timeline geom with text annotations linked to the selected earthquakes which can be added to a ggplot.
+A geom to plot text labels for location (but also for date, magnitude, deaths, etc) linked to selected earthquakes which can be added to a ggplot.
 }
 \description{
-This function reads an Earthquake dataset in a dataframe format to plot a time line of earthquakes ranging from the minimum to the maximum dates with a point for each earthquake, and adds annotations to the plotted data.This geom adds a vertical line to each data point with a text annotation showing the location of the earthquake attached to each line.
-The x aesthetic is a date and an optional y aesthetic is a factor that stratifies the data by country, in which case multiple time lines will be plotted, one for each country. The label aesthetic indicates the name of the location of the earthquake.
+This function reads an Earthquake dataset in a dataframe format to create annotations to the plotted data.This geom adds a vertical line to each data point with a text annotation showing the location (or other information) of the earthquake attached to each line.
+The x aesthetic is a date and an optional y aesthetic is a factor that stratifies the data by country, in which case multiple time lines will be plotted, one for each country. The label aesthetic indicates the name of the location of the earthquake (or the information to be dislayed).
 There is the option to subset to n_max number of earthquakes, where the function takes the n_max largest (by magnitude) earthquakes.
-In addition to showing the dates on which the earthquakes occur, it is also possible to show the magnitudes (i.e. Richter scale value) and the number of deaths associated with each earthquake.
 }
 \examples{
 \dontrun{
 quakedata<-eq_clean_data("signif.txt") \%>\% eq_location_clean()
-ggplot() + geom_timeline_label(data = quakedata,aes(x = DATETIME, label = LOCATION_NAME,y = COUNTRY, n_max = 10, size = EQ_MAG_ML, fill = DEATHS)) + scale_color_gradient()
+ggplot() + geom_timeline(data = quakedata,aes(x = DATETIME, y = COUNTRY, size = EQ_PRIMARY, colour = TOTAL_DEATHS)) + geom_timeline_label(data = quakedata,aes(x = DATETIME, label = LOCATION_NAME,y = COUNTRY, n_max = 10, magnitude = EQ_PRIMARY)) + scale_color_gradient()
 }
 
 }
