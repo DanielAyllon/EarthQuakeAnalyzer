@@ -13,6 +13,7 @@
 #' @return An earthquakes' timeline geom which can be added to a ggplot.
 #'
 #' @importFrom ggplot2 ggproto
+#' @importFrom ggplot2 geom
 #' @importFrom ggplot2 aes
 #' @importFrom ggplot2 draw_key_point
 #' @importFrom ggplot2 layer
@@ -30,7 +31,8 @@
 #' }
 #'
 #' @export
-GeomTimeline<- ggplot2::ggproto("GeomTimeline", Geom,
+GeomTimeline<- ggplot2::ggproto("GeomTimeline",
+                                ggplot2::Geom,
                           required_aes = "x",
                           default_aes = ggplot2::aes(y=0.1,fill = "blue",colour="blue",
                                                      size=0.01,alpha=0.7,stroke = 0.5,
