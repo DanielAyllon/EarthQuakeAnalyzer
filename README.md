@@ -1,5 +1,7 @@
 # EarthQuakeAnalyzer
 
+[![Build Status](https://travis-ci.org/DanielAyllon/EarthQuakeAnalyzer.svg?branch=master)](https://travis-ci.org/DanielAyllon/EarthQuakeAnalyzer)
+
 I get two important errors; hope someone can help me with this:
 1. With the Geoms: when I use EQ_PRIMARY to define the size of the circles I get an error that disappears when I get rid of the size parameter:
 Error in check.length(gparname) : 
