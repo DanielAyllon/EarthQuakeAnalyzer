@@ -284,8 +284,9 @@ popup_text=ifelse(!is.na(TOTAL_DEATHS),paste(popup_text,      "<b>Total deaths:<
 ```
 
 ```{r label for earthquakes in Mexico since year 2000}
-eq_clean_data("signif.txt") %>%
+eq_clean_data("signif.txt") %>% 
 dplyr::filter(COUNTRY == "MEXICO" & lubridate::year(DATETIME) >= 2000) %>% 
+eq_location_clean() %>%
 eq_create_label() %>% 
 eq_map(annot_col = "popup_text")
 ```
