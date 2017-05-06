@@ -18,7 +18,7 @@ knitr::opts_chunk$set(echo = TRUE,message=F, warning=F)
 
 The R EarthQuakeAnalyzer package was developed to work with the NOAA Significant Earthquakes dataset.
 
-The package incorporate tools for processing and visualizing the dataset obtained from the U.S. National Oceanographic and Atmospheric Administration (NOAA) on significant earthquakes around the world. This dataset contains information about 5,933 earthquakes over an approximately 4,000 year time span. The dataset is included in the package in a data frame format - `EarthquakeDataFrame` - to be loaded through the data() function. Likewise, the raw data - `signif.txt` - is stored in the `inst/extdata` directory so that it can be accessed.    
+The package incorporate tools for processing and visualizing the dataset obtained from the U.S. National Oceanographic and Atmospheric Administration (NOAA) on significant earthquakes around the world. This dataset contains information about 5,933 earthquakes over an approximately 4,000 year time span. The dataset is included in the package in a data frame format - `EarthquakeDataFrame` - to be loaded through the data() function. Likewise, the raw data - `signif.txt` - is stored in the `inst/extdata` - directory so that it can be accessed.    
 
 It includes tools for: (1) reading and cleaning the dataset, (2) adding a geom instance to a ggplot object to plot a timeline of selected earthquakes providing information about the magnitude and number of deaths, and (3) creating a leaflet fully interactive map showing the location of epicenters of selected earthquakes with information regarding the magnitude and number of deaths.
 
