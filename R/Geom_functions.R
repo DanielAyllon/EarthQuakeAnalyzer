@@ -10,7 +10,7 @@
 #' @param size Optional aesthetic which contains a numeric vector of the magnitude (in the Richter scale) of each earthquake, which will define the size of the points to be plotted.
 #' @param alpha Optional aesthetic that represents a number between 0 and 1, which indicates the level of transparency of represented points.
 #'
-#' @return An earthquakes' timeline geom which can be added to a ggplot.
+#' @return An earthquakes' timeline geom object which can be added to a ggplot.
 #'
 #' @importFrom ggplot2 ggproto
 #' @importFrom ggplot2 Geom
@@ -68,7 +68,11 @@ GeomTimeline<- ggplot2::ggproto("GeomTimeline",
                           }
 )
 
-
+#' Function to display the earthquake timelines
+#'
+#' The function displays timelines of earthquakes based on the \code{GeomTimeline}.
+#'
+#' @export
 geom_timeline <- function(mapping = NULL, data = NULL, stat = "identity", position = "identity", na.rm = FALSE, show.legend = NA, inherit.aes = TRUE, ...) {
         ggplot2::layer(
                 geom = GeomTimeline, mapping = mapping,
@@ -170,7 +174,11 @@ GeomTimelineLabel<- ggplot2::ggproto("GeomTimelineLabel", ggplot2::Geom,
                                 }
 )
 
-
+#' Function to display the annotated labels for the earthquake timelines
+#'
+#' The function displays the annotated labels for the timelines of earthquakes based on the \code{GeomTimelineLabel}.
+#'
+#' @export
 geom_timeline_label <- function(mapping = NULL, data = NULL, stat = "identity", position = "identity", na.rm = FALSE, show.legend = NA, inherit.aes = TRUE,fontsize = 10,
                                 angle = 45, ...) {
         ggplot2::layer(

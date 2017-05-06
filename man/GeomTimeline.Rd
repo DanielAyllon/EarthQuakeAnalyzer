@@ -20,7 +20,7 @@ GeomTimeline
 \item{alpha}{Optional aesthetic that represents a number between 0 and 1, which indicates the level of transparency of represented points.}
 }
 \value{
-An earthquakes' timeline geom which can be added to a ggplot.
+An earthquakes' timeline geom object which can be added to a ggplot.
 }
 \description{
 This function reads an Earthquake dataset in a dataframe format to plot a time line of earthquakes ranging from the minimum to the maximum dates with a point for each earthquake.
