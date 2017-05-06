@@ -1,7 +1,7 @@
 ---
-title: "Model Details for QuakeAnalyzer package"
-author: "Daniel Ayllon"
-date: "17 April 2017"
+title: "Model Details for EarthQuakeAnalyzer package"
+author: "Daniel Ayllón"
+date: "6 May 2017"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Model Details for QuakeAnalyzer package}
@@ -14,11 +14,11 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE,message=F, warning=F)
 ```
 
-# R QuakeAnalyzer package
+# R EarthQuakeAnalyzer package
 
-The R QuakeAnalyzer package was developed to work with the NOAA Significant Earthquakes dataset.
+The R EarthQuakeAnalyzer package was developed to work with the NOAA Significant Earthquakes dataset.
 
-The package incorporate tools for processing and visualizing the dataset obtained from the U.S. National Oceanographic and Atmospheric Administration (NOAA) on significant earthquakes around the world. This dataset contains information about 5,933 earthquakes over an approximately 4,000 year time span. The dataset is included in the package in a data frame format - `EarthquakeDataFrame` - to be loaded through the data() function. Likewise, the raw data - `signif.txt` - is stored in the `inst/extdata` - directory so that it can be accessed.    
+The package incorporate tools for processing and visualizing the dataset obtained from the U.S. National Oceanographic and Atmospheric Administration (NOAA) on significant earthquakes around the world. This dataset contains information about 5,933 earthquakes over an approximately 4,000 year time span. The dataset is included in the package in a data frame format - `EarthquakeDataFrame` - to be loaded through the data() function. Likewise, the raw data - `signif.txt` - is stored in the `inst/extdata` directory so that it can be accessed.    
 
 It includes tools for: (1) reading and cleaning the dataset, (2) adding a geom instance to a ggplot object to plot a timeline of selected earthquakes providing information about the magnitude and number of deaths, and (3) creating a leaflet fully interactive map showing the location of epicenters of selected earthquakes with information regarding the magnitude and number of deaths.
 
@@ -154,7 +154,7 @@ geom_timeline <- function(mapping = NULL, data = NULL, stat = "identity", positi
 }
 ```
 
-```{r plot timeline of earthquakes}
+```{r plot timeline of earthquakes, fig.width = 7, fig.height = 4}
 quakedata<-eq_clean_data("signif.txt") %>%
   filter(year(DATETIME)>2000 & COUNTRY==c("USA","CHINA"))
 ggplot() + geom_timeline(data = quakedata,aes(x = DATETIME, y = COUNTRY, size = EQ_PRIMARY, colour = TOTAL_DEATHS))
@@ -233,7 +233,7 @@ geom_timeline_label <- function(mapping = NULL, data = NULL, stat = "identity", 
 }
 ```
 
-```{r plot annotated timeline of earthquakes}
+```{r plot annotated timeline of earthquakes, fig.width = 7, fig.height = 4}
 quakedata<-eq_clean_data("signif.txt") %>% eq_location_clean() %>%
   filter(year(DATETIME)>2000 & COUNTRY==c("USA","CHINA")) 
 ggplot() + geom_timeline(data = quakedata,aes(x = DATETIME, y = COUNTRY, size = EQ_PRIMARY, colour = TOTAL_DEATHS)) + geom_timeline_label(data = quakedata,aes(x = DATETIME, label = LOCATION_NAME,y = COUNTRY, n_max = 10, magnitude = EQ_PRIMARY)) + scale_color_gradient()
@@ -260,7 +260,7 @@ eq_map<-function(dataframe,annot_col){
 }
 ```
 
-```{r earthquakes in Mexico since year 2000}
+```{r earthquakes in Mexico since year 2000, fig.width = 7, fig.height = 4}
 eq_clean_data("signif.txt") %>%
 dplyr::filter(COUNTRY == "MEXICO" & lubridate::year(DATETIME) >= 2000) %>% 
 eq_map(annot_col = "DATETIME")
@@ -283,7 +283,7 @@ popup_text=ifelse(!is.na(TOTAL_DEATHS),paste(popup_text,      "<b>Total deaths:<
 }
 ```
 
-```{r label for earthquakes in Mexico since year 2000}
+```{r label for earthquakes in Mexico since year 2000, fig.width = 7, fig.height = 4}
 eq_clean_data("signif.txt") %>% 
 dplyr::filter(COUNTRY == "MEXICO" & lubridate::year(DATETIME) >= 2000) %>% 
 eq_location_clean() %>%
