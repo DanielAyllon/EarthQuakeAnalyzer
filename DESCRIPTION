@@ -5,7 +5,7 @@ Version: 0.1.0
 Author: Daniel Ayllón
 Maintainer: Daniel Ayllón <daniel.ayllon@bio.ucm.es>
 Description: Clean, analyze and visualize earthquake data from the NOAA Significant Earthquakes dataset.
-License: CC0
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Suggests:
