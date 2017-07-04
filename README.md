@@ -2,6 +2,9 @@
 
 [![Build Status](https://travis-ci.org/DanielAyllon/EarthQuakeAnalyzer.svg?branch=master)](https://travis-ci.org/DanielAyllon/EarthQuakeAnalyzer)
 
-** NOTE TO REVIEWERS: the package has a few warning related to documentation issue which, unfortunately, I don't have time to fix. Additional notes of "no visible binding to global variable" in the eq_clean_data() function are also present***
+This Package provides functions for handling earthquake records from the National Centers for Environmental Information, National Oceanic and Atmospheric Administration's (NOAA) - Significant Earthquake Database. The package provides three main functionalities:
+1) Data cleaning
+2) Plotting timeline series of earthquakes with the ggplot2 package
+3) Visualization of earthquake data through leaflet interactive maps
 
-The Package has functions to clean, plot and visualize earthquake data from the National Centers for Environmental Information, National Oceanic and Atmospheric Administration's (NOAA) - Significant Earthquake Database. It includes functions to plot timeline series of earthquakes with ggplot2 package and to visualize leaflet interactive maps.
+This package was prepared as the final assignment for the course **Mastering Software Development in R Capstone**, so it is not recommended for actual use. 
